@@ -24,57 +24,57 @@ string cardName(string name, long cardNum, int length)
     int secondDigit = cardNum / secondPow;
     switch (length)
     {
-    case 13:
-        if (firstDigit == 4)
-        {
-            name = "VISA";
-        }
-        else
-        {
-            name = "INVALID";
-        };
-        return name;
-    case 15:
-        if (firstDigit == 3)
-        {
-            if (secondDigit == 34 || secondDigit == 37)
+        case 13:
+            if (firstDigit == 4)
             {
-                name = "AMEX";
+                name = "VISA";
             }
             else
             {
                 name = "INVALID";
             };
-        }
-        else
-        {
-            name = "INVALID";
-        };
-        return name;
-    case 16:
-        if (firstDigit == 4)
-        {
-            name = "VISA";
-        }
-        else if (firstDigit == 5)
-        {
-            if (secondDigit >= 51 && secondDigit <= 55)
+            return name;
+        case 15:
+            if (firstDigit == 3)
             {
-                name = "MASTERCARD";
+                if (secondDigit == 34 || secondDigit == 37)
+                {
+                    name = "AMEX";
+                }
+                else
+                {
+                    name = "INVALID";
+                };
             }
             else
             {
                 name = "INVALID";
             };
-        }
-        else
-        {
+            return name;
+        case 16:
+            if (firstDigit == 4)
+            {
+                name = "VISA";
+            }
+            else if (firstDigit == 5)
+            {
+                if (secondDigit >= 51 && secondDigit <= 55)
+                {
+                    name = "MASTERCARD";
+                }
+                else
+                {
+                    name = "INVALID";
+                };
+            }
+            else
+            {
+                name = "INVALID";
+            };
+            return name;
+        default:
             name = "INVALID";
-        };
-        return name;
-    default:
-        name = "INVALID";
-        return name;
+            return name;
     };
 };
 
