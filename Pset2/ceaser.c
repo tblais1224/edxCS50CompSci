@@ -4,54 +4,68 @@
 
 int main(int argc, string argv[])
 {
-    char *alphabet[26] = {"a", "b", "c", "d", "e", "f","g", "h", "i","j", "k", "l","m", "n", "o","p", "q", "r","s", "t", "u", "v", "w", "x", "y", "z"};
-    char *alphabetCaps[26] = {"A", "B", "C", "D", "E", "F","G", "H", "I","J", "K", "L","M", "N", "O","P", "Q", "R","S", "T", "U", "V", "W", "X", "Y", "Z"};
-    
+    char alphabet[26] = "abcdefghijklmnopqrstuvwxyz";
+    char alphabetCaps[26] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     int key = 0;
+    if(argv[1]>0)
+    {
+        key = atoi(argv[1]);
+    }
+    else
+    {
+        return 1;
+    }
+    
     string plainText = "";
-    key = get_int("Please input a number greater than 0: ");
+//     key = get_int("Please input a number greater than 0: ");
     plainText = get_string("Please enter a string to be encrypted: ");
     int count = 0;
-    while(plainText[count])
+    printf("ciphertext: ");
+    while (plainText[count])
     {
-        char character[2] = "\0";
-        character[0] = plainText[count];
-        char *newCharacter = character;
-        for(int i = 0; i < 26; i++)
+//         char *character[2] = "\0";
+//         character[0] = plainText[count];
+        char character = plainText[count];
+        char newCharacter = character;
+        for (int i = 0; i < 26; i++)
         {
-            char *alphChar = alphabet[i];
-            char *alphCharCap = alphabetCaps[i];
-            if(newCharacter == alphChar)
+            char alphChar = alphabet[i];
+            char alphCharCap = alphabetCaps[i];
+            if (plainText[count] == alphChar)
             {
-                printf("hi");
                 int newIndex = i + key;
-                if(newIndex < 26)
+                if (newIndex < 26)
                 {
                     newCharacter = alphabet[newIndex];
                 }
                 else
                 {
-                    int newerIndex = newIndex - 26;
+                    while(newIndex > 25)
+                    {
+                        newIndex = newIndex - 26;
+                    };
                     newCharacter = alphabet[newIndex];
                 }
                 i = 26;
             }
-            else if(character == alphCharCap)
+            else if (plainText[count] == alphCharCap)
             {
                 int newIndex = i + key;
-                if(newIndex < 26)
+                if (newIndex < 26)
                 {
                     newCharacter = alphabetCaps[newIndex];
                 }
                 else
                 {
                     int newerIndex = newIndex - 26;
-                    newCharacter = alphabetCaps[newIndex];
+                    newCharacter = alphabetCaps[newerIndex];
                 };
                 i = 26;
             };
         };
-        printf("%s" , newCharacter);
+        printf("%c", newCharacter);
         count++;
     }
+    printf("\n");
+    return 0;
 }
