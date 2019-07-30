@@ -1,99 +1,50 @@
-// Copies a BMP file
+# Questions
 
-#include <stdio.h>
-#include <stdlib.h>
+## What's `stdint.h`?
 
-#include "bmp.h"
+A header file that specifies width integer types, with min and max allowed values. Contains the definition of new int types to specify width of them. for example int32_t will gaurentee the system environment will have 32 bits for this int type.
 
-int main(int argc, char *argv[])
-{
-    // ensure proper usage
-    if (argc != 3)
-    {
-        printf("Usage: copy infile outfile\n");
-        return 1;
-    }
+## What's the point of using `uint8_t`, `uint32_t`, `int32_t`, and `uint16_t` in a program?
 
-    // remember filenames
-    char *infile = argv[1];
-    char *outfile = argv[2];
+These structs are used to tell the environment what byte/bit size to use for the corrosponding int type. For example uint16_t will have 2 bytes or 16 bits which is a unsigned short (0 to 65535). An unsigned char = uint8_t and uses 1 byte / 8 bits. ( ((2^8) - 1 = 256 - 1 = 255) 0 to 255, 256 = 0, 257 = 1, etc.) 
 
-    // open input file
-    FILE *inptr = fopen(infile, "r");
-    if (inptr == NULL)
-    {
-        printf("Could not open %s.\n", infile);
-        return 2;
-    }
+## How many bytes is a `BYTE`, a `DWORD`, a `LONG`, and a `WORD`, respectively?
 
-    // open output file
-    FILE *outptr = fopen(outfile, "w");
-    if (outptr == NULL)
-    {
-        fclose(inptr);
-        printf("Could not create %s.\n", outfile);
-        return 3;
-    }
+1 byte = 8 bits, 1 word = 2 bytes = 16 bits, 1 dword (double word) = 4 bytes = 32 bits, 1 long = 8 bytes = 64 bits
 
-    // read infile's BITMAPFILEHEADER
-    BITMAPFILEHEADER bf;
-    fread(&bf, sizeof(BITMAPFILEHEADER), 1, inptr);
+## What (in ASCII, decimal, or hexadecimal) must the first two bytes of any BMP file be? Leading bytes used to identify file formats (with high probability) are generally called "magic numbers."
 
-    // read infile's BITMAPINFOHEADER
-    BITMAPINFOHEADER bi;
-    fread(&bi, sizeof(BITMAPINFOHEADER), 1, inptr);
+In a BMP file the first two bytes identify the file is 0x42 0x4D in hexadecimal / BM in ASCII.
+Possible entries in ASCII are BM (windows 3.1x,95,NT, etc), BA (bitmap arrar), CI (color icon), CP (color pointer), IC (icon), PT (pointer)
 
-    // ensure infile is (likely) a 24-bit uncompressed BMP 4.0
-    if (bf.bfType != 0x4d42 || bf.bfOffBits != 54 || bi.biSize != 40 ||
-        bi.biBitCount != 24 || bi.biCompression != 0)
-    {
-        fclose(outptr);
-        fclose(inptr);
-        printf("Unsupported file format.\n");
-        return 4;
-    }
+## What's the difference between `bfSize` and `biSize`?
 
-    // write outfile's BITMAPFILEHEADER
-    fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
+bfSize is the size of the entire bmp file including headers, while biSize is the size of the bitmapinfoheader only, so its constant and = 40 bytes.
 
-    // write outfile's BITMAPINFOHEADER
-    fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
+## What does it mean if `biHeight` is negative?
 
-    // determine padding for scanlines
-    int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+Negative biHeight means the bitmap is top down DIB and its origin is the upper left corner. BiCompression is either BI_RGB or BI_BITFIELDS, they cannot be compressed. 
 
-    // iterate over infile's scanlines
-    for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
-    {
-        // iterate over pixels in scanline
-        for (int j = 0; j < bi.biWidth; j++)
-        {
-            // temporary storage
-            RGBTRIPLE triple;
+## What field in `BITMAPINFOHEADER` specifies the BMP's color depth (i.e., bits per pixel)?
 
-            // read RGB triple from infile
-            fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+biBitCount specifies bits per pixel.
 
-            // write RGB triple to outfile
-            fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
-        }
+## Why might `fopen` return `NULL` in `copy.c`?
 
-        // skip over padding, if any
-        fseek(inptr, padding, SEEK_CUR);
+fopen will return false if the 2nd argument, the file mode, is not ("r") readable. If read access is not granted.
 
-        // then add it back (to demonstrate how)
-        for (int k = 0; k < padding; k++)
-        {
-            fputc(0x00, outptr);
-        }
-    }
+## Why is the third argument to `fread` always `1` in our code?
 
-    // close infile
-    fclose(inptr);
+The third argument is always 1 because it tells fread to read the file one time from the pointer. 
 
-    // close outfile
-    fclose(outptr);
+## What value does `copy.c` assign to `padding` if `bi.biWidth` is `3`?
 
-    // success
-    return 0;
-}
+TODO
+
+## What does `fseek` do?
+
+TODO
+
+## What is `SEEK_CUR`?
+
+TODO
