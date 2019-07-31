@@ -39,12 +39,13 @@ The third argument is always 1 because it tells fread to read the file one time 
 
 ## What value does `copy.c` assign to `padding` if `bi.biWidth` is `3`?
 
-TODO
+int padding = (4 - (3 * 3) % 4) % 4;
+padding = 3;
 
 ## What does `fseek` do?
 
-TODO
+fseek is used to move the file position that the file ptr specifies, to a new location within the file. fssek(file_ptr, offset, position)
 
 ## What is `SEEK_CUR`?
 
-TODO
+seek_cu moves the file pointer position to given location.
