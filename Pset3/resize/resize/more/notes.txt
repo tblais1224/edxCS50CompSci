@@ -1,0 +1,40 @@
+use fread(data, size, number, inptr)
+
+data = pointer to struct that contains the bytes you are reading
+size = size of each element read
+number = number of elements to read
+inptr = File to read from
+
+fwrite(data, size numb outptr)
+
+
+each pixel is 3bytes, each scanline length must be a multiple of 4, 
+add padding if the number of pixels isnt a multiple of 4
+
+padding = 0x00
+
+
+padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4
+
+size of rgb will stay consistent but the biwidth may be different
+
+use fseek to skip over infile padding and 
+use fputc to write the outfile newpadding for each row
+
+resize vertically
+1. figure out the row to be written
+2. seek to the row
+3. drawpixels into outfile
+4. wite the outfiles necassery row padding
+
+correct behavior below:
+$ ./resize
+Usage: ./resize f infile outfile
+$ echo $?
+1
+$ ./resize .5 large.bmp smaller.bmp
+$ echo $?
+0
+$ ./resize 2 small.bmp larger.bmp
+$ echo $?
+0
