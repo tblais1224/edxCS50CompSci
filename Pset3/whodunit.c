@@ -70,10 +70,17 @@ int main(int argc, char *argv[])
         {
             // temporary storage
             RGBTRIPLE triple;
-
+            
             // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-
+            
+            if (triple.rgbtRed == 0xFF)
+            {
+                triple.rgbtRed = 0xFF;
+                triple.rgbtGreen = 0xFF;
+                triple.rgbtBlue = 0xFF;
+            }
+            
             // write RGB triple to outfile
             fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
         }
