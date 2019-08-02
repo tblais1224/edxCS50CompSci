@@ -1,0 +1,19 @@
+todo:
+1. open memory card file
+        fopen - check for null value
+2. find beginning of jpeg
+3. open new jpeg
+4. write 512 bytes until new jpeg found
+5. detect end of file
+
+
+jpeg: first 3 bytes : 0xff 0xd8 0xff, last byte: 0xe0, 0xe1, 0xe2... oxef
+each block is 512 bytes
+
+use fread to read files in memory
+either use fread(buffer, 1, 512, raw_file) of fread(buffer, 512, 1, raw_file)
+
+filenames = ###.jpg   name in order found startin at 000
+
+sprintf(filename, "%03i.jpg", 2)
+filename will be a char array to storestring
