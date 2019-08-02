@@ -7,16 +7,21 @@
 
 int main(int argc, char *argv[])
 {
+
+    int f = argv[1];
+
+
+
     // ensure proper usage
-    if (argc != 3)
+    if (argc != 4)
     {
         fprintf(stderr, "Usage: copy infile outfile\n");
         return 1;
     }
 
     // remember filenames
-    char *infile = argv[1];
-    char *outfile = argv[2];
+    char *infile = argv[2];
+    char *outfile = argv[3];
 
     // open input file
     FILE *inptr = fopen(infile, "r");
