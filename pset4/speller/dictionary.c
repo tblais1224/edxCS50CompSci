@@ -18,86 +18,158 @@ typedef struct node
 }
 node;
 
-// Represents a trie
 node *root;
+
+int count = 0;
+
+// returns index of char
+int get_index(char c)
+{
+    if (c == '\'')
+    {
+        return 26;
+    }
+    else if (c >= 'a' && c <= 'z')
+    {
+        return c - 'a';
+    }
+    else if (c >= 'A' && c <= 'Z')
+    {
+        return c - 'A';
+    }
+    //error, not a-zA-Z char
+    return -1;
+}
+
+// create an all NULL root / new node
+node *create_node()
+{
+    // Initialize trie
+    node *create_root = malloc(sizeof(node));
+    // set end of word to false until changed
+    create_root->is_word = false;
+    // create a NULL node for each letter and \0
+    for (int i = 0; i < 27; i++)
+    {
+        create_root->children[i] = NULL;
+    }
+    return create_root;
+}
 
 // Loads dictionary into memory, returning true if successful else false
 bool load(const char *dictionary)
 {
-    // Initialize trie
-    root = malloc(sizeof(node));
-    if (root == NULL)
-    {
-        return false;
-    }
-    root->is_word = false;
-    for (int i = 0; i < N; i++)
-    {
-        root->children[i] = NULL;
-    }
 
-    // Open dictionary
-    FILE *file = fopen(dictionary, "r");
-    if (file == NULL)
+    int index;
+    root = create_node();
+
+    // open readable dictionary file
+    FILE *dict_ptr = fopen(dictionary, "r");
+    if (dict_ptr == NULL)
     {
-        unload();
+        fprintf(stderr, "File empty\n");
+        // Indicate failed
         return false;
     }
 
-    // Buffer for a word
-    char word[LENGTH + 1];
-
-    // Insert words into trie
-    while (fscanf(file, "%s", word) != EOF)
+    //initialize root node as new_node
+    node *new_node = root;
+    
+    char c_init = fgetc(dict_ptr);
+    
+    //initialize c to get chars one at a time from words in dict
+    for (char c = c_init; c != EOF; c = fgetc(dict_ptr))
     {
-        int i, j;
-        for(i = 0;i < 50; ++i){
-            if (word[i] == ''\0')
+        if (c != '\n')
+        {
+            //get characters index in tree
+            index = get_index(c);
+            // create new node if no child node with chars index
+            if (new_node->children[index] == NULL)
             {
-                // to mark the end of the word flag for this string
-                root -> is_word = 1;
-                break;
+                // create a new node at the new_nodes child for the char test
+                new_node->children[index] = create_node();
             }
-            //if the child node is pointing to NULL
-            if(root -> children[word[i] - 'a'] == NULL){
-                struct node *n;
-                //initialise the new node
-                n = node;
-                for(j = 0; j < 26; ++j){
-                    n -> children[j] = NULL;
-                }
-                n -> is_word = 0;
-                root -> children[word[i] - 'a'] = n;
-                root = n;
-            }
-            else root = root -> children[word[i] - 'a'];
+            //set the new node equal to the child node just created
+            new_node = new_node->children[index];
+        }
+        else
+        {
+            // mark end of word
+            new_node->is_word = true;
+            // add to word count
+            count++;
+            // set new_node back to the root node
+            new_node = root;
         }
     }
 
     // Close dictionary
-    fclose(file);
-
-    // Indicate success
+    fclose(dict_ptr);
     return true;
 }
+
 
 // Returns number of words in dictionary if loaded else 0 if not yet loaded
 unsigned int size(void)
 {
     // TODO
-    return 0;
+    return count;
 }
 
 // Returns true if word is in dictionary else false
 bool check(const char *word)
 {
-    // TODO
+    node *new_node = root;
+    // loop through each char of a word, set to 45 (max chars in word) because loop will break when not found in tree anyways
+    for (int i = 0; i < 45; i++)
+    {
+        // check for end of word
+        if (word[i] == '\0')
+        {
+            // if word is word is true ruten tru, else word isnt in dict so return false
+            if (new_node->is_word == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        int index = get_index(word[i]);
+        // if the childs index is false then word isnt in dict so return false
+        if (new_node->children[index] == NULL)
+        {
+            return false;
+        }
+        // set node pointer to the child at the char index
+        new_node = new_node->children[index];
+
+    }
     return false;
+}
+
+bool unload2(node *new_node)
+{
+    for (int i = 0; i < 27; i++)
+    {
+        if (new_node->children[i] != NULL)
+        {
+            unload2(new_node->children[i]);
+        }
+    }
+    free(new_node);
+    return true;
 }
 
 // Unloads dictionary from memory, returning true if successful else false
 bool unload(void)
 {
-    // TODO
+    if (unload2(root))
+    {
+        return true;
+    }
     return false;
 }
+
