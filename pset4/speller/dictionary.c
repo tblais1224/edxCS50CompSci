@@ -121,8 +121,9 @@ unsigned int size(void)
 bool check(const char *word)
 {
     node *new_node = root;
+
     // loop through each char of a word, set to 45 (max chars in word) because loop will break when not found in tree anyways
-    for (int i = 0; i < 45; i++)
+    for (int i = 0; i < 46; i++)
     {
         // check for end of word
         if (word[i] == '\0')
