@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #include "dictionary.h"
 
 // Represents number of children for each node in a trie
@@ -49,7 +50,28 @@ bool load(const char *dictionary)
     // Insert words into trie
     while (fscanf(file, "%s", word) != EOF)
     {
-        // TODO
+        int i, j;
+        for(i = 0;i < 50; ++i){
+            if (word[i] == ''\0')
+            {
+                // to mark the end of the word flag for this string
+                root -> is_word = 1;
+                break;
+            }
+            //if the child node is pointing to NULL
+            if(root -> children[word[i] - 'a'] == NULL){
+                struct node *n;
+                //initialise the new node
+                n = node;
+                for(j = 0; j < 26; ++j){
+                    n -> children[j] = NULL;
+                }
+                n -> is_word = 0;
+                root -> children[word[i] - 'a'] = n;
+                root = n;
+            }
+            else root = root -> children[word[i] - 'a'];
+        }
     }
 
     // Close dictionary
