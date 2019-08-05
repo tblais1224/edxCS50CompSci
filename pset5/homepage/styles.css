@@ -1,0 +1,11 @@
+.nav-icon{
+    height: 30px;
+    margin-right: 5px;
+}
+.red-dark{
+    background-color: darkred;
+}
+a:link{
+    color: whitesmoke;
+    text-decoration:none;
+}
