@@ -1,11 +1,46 @@
-.nav-icon{
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#body {
+    padding: 0px;
+    padding-bottom: 50px;
+    /* Height of the footer */
+}
+
+#container {
+    min-height: 100%;
+    position: relative;
+}
+
+#footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 50px;
+    /* Height of the footer */
+    background-color: darkred;
+    color: whitesmoke;
+    padding: 12.5px
+}
+
+.nav-icon {
     height: 30px;
     margin-right: 5px;
 }
-.red-dark{
+
+.red-dark {
     background-color: darkred;
 }
-a:link{
-    color: whitesmoke;
-    text-decoration:none;
+
+nav a.white-text {
+    color: whitesmoke !important;
+    text-decoration: none;
+}
+
+.bd-example {
+    top: 25px;
 }
