@@ -7,7 +7,7 @@ body {
 
 #body {
     padding: 0px;
-    padding-bottom: 35px;
+    padding-bottom: 34px;
     /* Height of the footer */
 }
 
@@ -65,12 +65,14 @@ nav a.white-text {
 .carousel-caption {
     top: 20% !important;
     height: 200px !important;
+    padding: 15px;
 }
 
 @media only screen and (max-width: 500px) {
     .carousel-caption {
         top: 8% !important;
         height: 180px !important;
+        padding-top: 2px !important;
     }
 }
 
@@ -87,7 +89,33 @@ carousel-indicators {
     right: 0;
     background-color: black;
     border-radius: 20px;
-    opacity: 0.5;
+    opacity: 0.6;
     width: 100%;
     height: 100%;
+}
+
+#auth-btn{
+    margin: 5px 8px 12px 8px;
+    min-width: 90px;
+}
+
+.welcome-card{
+    background-color: darkred;
+    color: whitesmoke;
+    border-radius: 0px !important;
+}
+
+.create-card{
+    color: white;
+    border-radius: 0px !important;
+    background-image: url("./img/creativeBG.png");
+    background-repeat: no-repeat;
+    border: 0px !important;
+    padding: 25px 25px;
+}
+
+.welcome-card .card-body{
+    background-color: rgb(77, 77, 77);
+    border-radius: 8px;
+    margin: 20px;
 }

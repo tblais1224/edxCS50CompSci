@@ -71,8 +71,9 @@
               <!-- <div class="carousel-caption d-none d-md-block"> -->
               <div class="carousel-caption">
                 <div class="bg"></div>
-                <h5>First slide label</h5>
-                <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+                <h3>Fitness Plans</h3>
+                <p>Find a fitness plan that best suits your goals, or sign up to create your very own!</p>
+                <button class="btn btn-info">Find A Plan</button>
               </div>
             </div>
             <div class="carousel-item">
@@ -80,8 +81,9 @@
               <!-- <div class="carousel-caption d-none d-md-block"> -->
               <div class="carousel-caption">
                 <div class="bg"></div>
-                <h5>Second slide label</h5>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                <h3>Workouts</h3>
+                <p>Choose a muscle group to target and find a workout to follow!</p>
+                <button class="btn btn-info">Find A Workout</button>
               </div>
             </div>
             <div class="carousel-item">
@@ -89,15 +91,16 @@
               <!-- <div class="carousel-caption d-none d-md-block"> -->
               <div class="carousel-caption">
                 <div class="bg"></div>
-                <h5>Third slide label</h5>
-                <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
+                <h3>Diets</h3>
+                <p>Search through our wide range of diets to find one that fits your lifestyle!</p>
+                <button class="btn btn-info">Find A Plan</button>
               </div>
             </div>
-            <ol class="carousel-indicators">
+            <!-- <ol class="carousel-indicators d-none d-sm">
               <li data-target="#carouselExampleCaptions" data-slide-to="0" class="active"></li>
               <li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
               <li data-target="#carouselExampleCaptions" data-slide-to="2"></li>
-            </ol>
+            </ol> -->
           </div>
           <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -111,17 +114,26 @@
       </div>
 
       <!-- Landing Info -->
-      <div class="card text-center">
-        <div class="card-header">
+      <div class="card text-center welcome-card">
+        <h2 class="card-header">
           Welcome to Fitness Club!
-        </div>
+        </h2>
         <div class="card-body">
-          <h5 class="card-title">Special title treatment</h5>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
+            <h5 class="card-title">Sign Up To Use All Our Features!</h5>
+          <a href="./login.html" class="btn btn-primary" id="auth-btn">LOGIN</a>
+          <a href="./register.html" id="auth-btn" style="background-color: lightblue"
+            class="btn btn-outline-dark">REGISTER</a>
+          <p class="card-text">Here at Fitness Club we have made it our goal to develop a community based library of
+            workout, diets and fitness plans that are freely available to everyone. We encourage users to follow their
+            favorites and leave friendly comments or reviews to help others find the best ways to live healthy, fit lifestyles.</p>
         </div>
-        <div class="card-footer text-muted">
-          2 days ago
+      </div>
+      <div class="card text-center create-card">
+        <div class="card-body">
+          <h5 class="card-title create-inner-darken">Feeling creative or want to share your fitness tips?</h5>
+          <p class="card-text create-inner-darken">Try building your very own workouts, diets, or fitness plans to share
+            with the rest of our community.</p>
+          <a href="./creationLab.html" class="btn btn-primary" id="auth-btn">START CREATING</a>
         </div>
       </div>
 
