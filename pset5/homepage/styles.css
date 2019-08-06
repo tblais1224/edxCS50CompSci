@@ -119,3 +119,19 @@ carousel-indicators {
     border-radius: 8px;
     margin: 20px;
 }
+
+.auth{
+    text-align: center;
+    padding: 5% 15% 5% 15%;
+}
+
+.form-body{
+    background-color: rgb(87, 85, 85);
+}
+.form-group-auth label{
+    font-size: 1.25em;
+    color: white;
+}
+.form-group-auth small{
+    color: white !important;
+}
