@@ -1,6 +1,6 @@
 height = input("Height: ")
 
-if( height.isdigit()):
+if(height.isdigit()):
     height = int(height)
 else:
     height = input("Height: ")
