@@ -25,24 +25,24 @@ def sentences(a, b):
 
 def substrings(a, b, n):
     outputSet = set()
-    aSubstrings = []
-    bSubstrings = []
+    aList = []
+    bList = []
 
-    for i in range(0, len(a), n):
-        string = ""
-        for k in range(0, n):
-            if len(a) > i + k:
-                string = string + a[i + k]
-        aSubstrings.append(string)
-    for i in range(0, len(b), n):
-        string = ""
-        for k in range(0, n):
-            if len(b) > i + k:
-                string = string + b[i + k]
-        bSubstrings.append(string)
+    if n > len(a) or n > len(b):
+        return outputSet
 
-    for x in aSubstrings:
-        if x in bSubstrings:
-            outputSet.add(x)
+    for i in range(len(a) - (n - 1)):
+        aList.append(a[i:i+n])
+    for i in range(len(b) - (n - 1)):
+        bList.append(b[i:i+n])
+
+    if len(bList) >= len(aList):
+        for i in bList:
+            if i in aList:
+                outputSet.add(i)
+    else:
+        for i in aList:
+            if i in bList:
+                outputSet.add(i)
     # TODO
     return list(outputSet)
