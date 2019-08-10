@@ -2,23 +2,80 @@
 
 {% block main %}
 
-    <!-- http://getbootstrap.com/docs/4.1/content/typography/ -->
-    <h1 class="mb-3">Form</h1>
+<h1 class="mb-3">Video Game Form</h1>
+<form action="/form" method="post">
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="inputTitle">Game Title</label>
+            <input type="text" class="form-control" id="inputTitle" placeholder="Title">
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="inputSystem">System</label>
+                <select id="inputSystem" class="form-control">
+                    <option selected>Choose...</option>
+                    <option>PlayStation 1</option>
+                    <option>PlayStation 2</option>
+                    <option>PlayStation 3</option>
+                    <option>PlayStation 4</option>
+                    <option>PSP</option>
+                    <option>PlayStation Vita</option>
+                    <option>Xbox</option>
+                    <option>Xbox 360</option>
+                    <option>Xbox One</option>
+                    <option>Nintendo NES</option>
+                    <option>Super Nintendo</option>
+                    <option>Nintendo 64</option>
+                    <option>Gamecube</option>
+                    <option>Wii</option>
+                    <option>Wii U</option>
+                    <option>Switch</option>
+                    <option>GameBoy</option>
+                    <option>GameBoy Color</option>
+                    <option>GameBoy Advance</option>
+                    <option>Nintendo DS</option>
+                    <option>Nintendo 3DS</option>
+                    <option>Switch</option>
+                    <option>Sega Master System</option>
+                    <option>Sega Genesis</option>
+                    <option>Sega Saturn</option>
+                    <option>Sega Dreamcast</option>
+                    <option>Atari 2600</option>
+                    <option>Atari 5200</option>
+                    <option>Atari 7800</option>
+                    <option>Atari Jaguar</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-sm-10">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="gridRadios" id="wishlist" value="wishlist" checked>
+                <label class="form-check-label" for="gridRadios1">
+                    Add To Wishlist
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="gridRadios" id="collection" value="collection">
+                <label class="form-check-label" for="gridRadios2">
+                    Add To Collection
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="played">
+                <label class="form-check-label" for="played">
+                    Add to have played
+                </label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+</form>
 
-    <!-- http://getbootstrap.com/docs/4.1/components/forms/ -->
-    <form action="/form" method="post">
-
-        <!-- TODO -->
-
-        <!-- http://getbootstrap.com/docs/4.1/components/buttons/ -->
-        <button class="btn btn-primary" type="submit">Submit</button>
-
-    </form>
-
-    <script>
-
-        /* TODO */
-
-    </script>
+<script>
+    /* TODO */
+</script>
 
 {% endblock %}
