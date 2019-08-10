@@ -31,9 +31,14 @@ def get_form():
 
 @app.route("/form", methods=["POST"])
 def post_form():
-    return render_template("error.html", message="TODO")
+    title = request.form.get("title")
+    system = request.form.get("system")
+    radios = request.form.get("gridRadios")
+    played = request.form.get("played")
 
+
+    return render_template("sheet.html")
 
 @app.route("/sheet", methods=["GET"])
 def get_sheet():
-    return render_template("error.html", message="TODO")
+    return render_template("sheet.html")
