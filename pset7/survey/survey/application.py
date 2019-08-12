@@ -1,5 +1,7 @@
 import cs50
 import csv
+import pandas as pd
+
 
 from flask import Flask, jsonify, redirect, render_template, request
 
@@ -54,4 +56,6 @@ def post_form():
 
 @app.route("/sheet", methods=["GET"])
 def get_sheet():
+    df = pd.read_csv("survey.csv")
+    df.to_html('sheet.html')
     return render_template("sheet.html")
