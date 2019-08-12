@@ -36,8 +36,20 @@ def post_form():
     radios = request.form.get("gridRadios")
     played = request.form.get("played")
 
-
+    with open('survey.csv', 'r') as readFile:
+        reader = csv.reader(readFile)
+    for row in reader:
+        print(row)
+    myData = [[1, 2, 3], ['Good Morning', 'Good Evening', 'Good Afternoon']]
+    myFile = open('survey.csv', 'w')
+    with myFile:
+        writer = csv.writer(myFile)
+        writer.writerows(myData)
+        
+    readFile.close()
+    myFile.close()
     return render_template("sheet.html")
+
 
 @app.route("/sheet", methods=["GET"])
 def get_sheet():
