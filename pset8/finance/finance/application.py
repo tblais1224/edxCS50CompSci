@@ -23,6 +23,7 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+
 # Custom filter
 app.jinja_env.filters["usd"] = usd
 
@@ -125,18 +126,36 @@ def quote():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        username=request.form.get("username")
+        password=request.form.get("password")
+        password2=request.form.get("password2")
+
         # Ensure username was submitted
-        if not request.form.get("username"):
+        if not username:
             return apology("must provide username", 403)
         # Ensure password was submitted
-        elif not request.form.get("password"):
+        elif not password:
             return apology("must provide password", 403)
         # Ensure password was submitted
-        elif request.form.get("password") != request.form.get("password2"):
+        elif password != password2:
             return apology("Password and confirm password must be the same", 403)
 
-    return apology("TODO")
+        # Query database for username
+        rows = db.execute("SELECT * FROM users WHERE username = :username", 
+                    username)
+        # Ensure username doesnt exist
+        if len(rows) > 0:
+            return apology("this username exists", 403)
 
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+
+        sql_command = "INSERT INTO users (username, hash) VALUES (%s, %s)"
+        val = (username, hashed_password)
+        db.execute(sql_command, val)
+        db.commit()
+        return render_template("login.html")
+    return render_template("register.html")
+    
 
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
