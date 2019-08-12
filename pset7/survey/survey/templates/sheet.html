@@ -12,13 +12,10 @@
     </thead>
     <tbody>
         {% for line in data %}
-
-            {{print(line)}}
             <tr>
-                <td> {{ line["Title"] }} </td>
-                <td> {{ line["System"] }} </td>
-                <td> {{ line["List"] }} </td>
-                <td> {{ line["Have Played"] }} </td>
+                {% for element in line %}
+                <td> {{ element }} </td>
+                {% endfor %}
             </tr>
         {% endfor %}
     </tbody>

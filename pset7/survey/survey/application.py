@@ -1,6 +1,5 @@
 import cs50
 import csv
-from prettytable import PrettyTable
 
 from flask import Flask, jsonify, redirect, render_template, request
 
@@ -49,24 +48,17 @@ def post_form():
         writer.writerows(myData)
     readFile.close()
     myFile.close()
-    return render_template("sheet.html")
+    return render_template("sheet.html", data=myData)
 
 
 @app.route("/sheet", methods=["GET"])
 def get_sheet():
     csv_file = open('survey.csv', 'r')
-    csv_file = csv_file.readlines()
-    line_1 = csv_file[0]
-    line_1 = line_1.split(',')
-    line_2 = csv_file[1]
-    line_2 = line_2.split(',')
-    x = PrettyTable(line_1[0],line_2[0])
-    for a in range(1, len(line_1)):
-        x.add_row([line_1[a],line_2[a]])
-    html_code = x.get_html_string()
-    print(html_code)
-    html_file = open('sheet.html','w')
-    html_file = html_file.write(html_code)
-    html_file.close()
-    return render_template("sheet.html")
+    csv_file_read = csv.reader(csv_file)
+    data = list(csv_file_read)
+    csv_file.close()
+    return render_template("sheet.html", data=data)
 
+
+if __name__ == "__main__":
+    app.run(debug=True)
