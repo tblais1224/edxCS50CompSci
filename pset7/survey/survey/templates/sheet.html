@@ -1,28 +1,27 @@
 {% extends "layout.html" %}
 
 {% block main %}
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">System</th>
+          <th scope="col">Collection / Wishlist</th>
+          <th scope="col">Have played</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for line in data %}
 
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script type="text/javascript" charset="utf-8">
-    d3.text("../survey.csv", function (data) {
-        var parsedCSV = d3.csv.parseRows(data);
-
-        var container = d3.select("body")
-            .append("table")
-
-            .selectAll("tr")
-            .data(parsedCSV).enter()
-            .append("tr")
-
-            .selectAll("td")
-            .data(function (d) {
-                return d;
-            }).enter()
-            .append("td")
-            .text(function (d) {
-                return d;
-            });
-    });
-</script>
+            {{print(line)}}
+            <tr>
+                <td> {{ line["Title"] }} </td>
+                <td> {{ line["System"] }} </td>
+                <td> {{ line["List"] }} </td>
+                <td> {{ line["Have Played"] }} </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}

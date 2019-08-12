@@ -1,7 +1,6 @@
 import cs50
 import csv
-import pandas as pd
-
+from prettytable import PrettyTable
 
 from flask import Flask, jsonify, redirect, render_template, request
 
@@ -42,7 +41,6 @@ def post_form():
     with open('survey.csv', 'r') as readFile:
         reader = csv.reader(readFile)
         for row in reader:
-            print(row)
             myData.append(row)
     myData.append(payload)
     myFile = open('survey.csv', 'w')
@@ -56,6 +54,19 @@ def post_form():
 
 @app.route("/sheet", methods=["GET"])
 def get_sheet():
-    df = pd.read_csv("survey.csv")
-    df.to_html('sheet.html')
+    csv_file = open('survey.csv', 'r')
+    csv_file = csv_file.readlines()
+    line_1 = csv_file[0]
+    line_1 = line_1.split(',')
+    line_2 = csv_file[1]
+    line_2 = line_2.split(',')
+    x = PrettyTable(line_1[0],line_2[0])
+    for a in range(1, len(line_1)):
+        x.add_row([line_1[a],line_2[a]])
+    html_code = x.get_html_string()
+    print(html_code)
+    html_file = open('sheet.html','w')
+    html_file = html_file.write(html_code)
+    html_file.close()
     return render_template("sheet.html")
+
