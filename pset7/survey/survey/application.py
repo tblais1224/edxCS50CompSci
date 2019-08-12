@@ -31,21 +31,22 @@ def get_form():
 
 @app.route("/form", methods=["POST"])
 def post_form():
-    title = request.form.get("title")
-    system = request.form.get("system")
-    radios = request.form.get("gridRadios")
-    played = request.form.get("played")
-
+    payload = []
+    payload.append(request.form.get("title"))
+    payload.append(request.form.get("system"))
+    payload.append(request.form.get("gridRadios"))
+    payload.append(request.form.get("played"))
+    myData = []
     with open('survey.csv', 'r') as readFile:
         reader = csv.reader(readFile)
-    for row in reader:
-        print(row)
-    myData = [[1, 2, 3], ['Good Morning', 'Good Evening', 'Good Afternoon']]
+        for row in reader:
+            print(row)
+            myData.append(row)
+    myData.append(payload)
     myFile = open('survey.csv', 'w')
     with myFile:
         writer = csv.writer(myFile)
         writer.writerows(myData)
-        
     readFile.close()
     myFile.close()
     return render_template("sheet.html")
