@@ -141,8 +141,7 @@ def register():
             return apology("Password and confirm password must be the same", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username", 
-                    username)
+        rows = db.execute("SELECT * FROM users WHERE username = %s", username)
         # Ensure username doesnt exist
         if len(rows) > 0:
             return apology("this username exists", 403)
@@ -152,10 +151,10 @@ def register():
         sql_command = "INSERT INTO users (username, hash) VALUES (%s, %s)"
         val = (username, hashed_password)
         db.execute(sql_command, val)
-        db.commit()
         return render_template("login.html")
     return render_template("register.html")
-    
+
+
 
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
