@@ -148,9 +148,15 @@ def register():
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
 
-        sql_command = "INSERT INTO users (username, hash) VALUES (%s, %s)"
+        # create user in db
+        sql_command_register = "INSERT INTO users (username, hash) VALUES (%s, %s)"
         val = (username, hashed_password)
-        db.execute(sql_command, val)
+        db.execute(sql_command_register, val)
+        # add 10000 cash to user portfolio
+        sql_command_portfolio = "INSERT INTO portfolio (symbol, total) VALUES (%s, %d)"
+        val = ("CASH", 10000.00)
+        db.execute(sql_command_portfolio, val)
+
         return render_template("login.html")
     return render_template("register.html")
 
@@ -173,3 +179,4 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
