@@ -1,5 +1,6 @@
 import os
 
+import requests
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
@@ -45,7 +46,44 @@ if not os.environ.get("API_KEY"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+    user_id = session["user_id"]
+    portfolios = db.execute(
+        "SELECT * FROM portfolio WHERE user_id = %s", user_id)
+
+    payload = []
+
+    api_key = os.environ.get("API_KEY")
+    for portfolio in portfolios:
+        data = []
+        data.append(portfolio["symbol"])
+        data.append(portfolio["name"])
+        data.append(portfolio["shares"])
+        print(portfolio["symbol"])
+        if portfolio["symbol"] == "CASH":
+            data.append("x")
+            data.append(portfolio["total"])
+        else:
+                    # "https://cloud-sse.iexapis.com//stable/stock/nflx/quote?token=pk_c68c80959746417aa4e351e5eb5cdb0d"
+            api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" + portfolio["symbol"] + "/quote?token=" + api_key + "").json()
+            print(api)
+            price = api["latestPrice"]
+            print(price)
+            data.append(price)
+            total = price * portfolio["shares"]
+            data.append(total)
+        payload.append(data)
+    net_total = 0.00
+    for x in payload:
+        net_total = net_total + x[4]
+
+    return render_template("portfolio.html", data=payload, net_total=net_total)
+
+
+@app.route("/quote", methods=["GET", "POST"])
+@login_required
+def quote():
+    """Get stock quote."""
+    return render_template("portfolio.html", data=payload, net_total=net_total)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -53,12 +91,6 @@ def index():
 def buy():
     """Buy shares of stock"""
     return apology("TODO")
-
-
-@app.route("/check", methods=["GET"])
-def check():
-    """Return true if username available, else false, in JSON format"""
-    return jsonify("TODO")
 
 
 @app.route("/history")
@@ -116,19 +148,12 @@ def logout():
     return redirect("/")
 
 
-@app.route("/quote", methods=["GET", "POST"])
-@login_required
-def quote():
-    """Get stock quote."""
-    return apology("TODO")
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username=request.form.get("username")
-        password=request.form.get("password")
-        password2=request.form.get("password2")
+        username = request.form.get("username")
+        password = request.form.get("password")
+        password2 = request.form.get("password2")
 
         # Ensure username was submitted
         if not username:
@@ -141,25 +166,27 @@ def register():
             return apology("Password and confirm password must be the same", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = %s", username)
+        rows = db.execute(
+            "SELECT username FROM users WHERE username = %s", username)
         # Ensure username doesnt exist
         if len(rows) > 0:
             return apology("this username exists", 403)
 
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+        hashed_password = generate_password_hash(
+            password, method='pbkdf2:sha256', salt_length=8)
 
         # create user in db
         sql_command_register = "INSERT INTO users (username, hash) VALUES (%s, %s)"
         val = (username, hashed_password)
         db.execute(sql_command_register, val)
+        user_id = db.execute(
+            "SELECT id FROM users WHERE username = %s", username)[0]["id"]
         # add 10000 cash to user portfolio
-        sql_command_portfolio = "INSERT INTO portfolio (symbol, total) VALUES (%s, %d)"
-        val = ("CASH", 10000.00)
-        db.execute(sql_command_portfolio, val)
-
+        sql_command_portfolio = "INSERT INTO portfolio (user_id, symbol, name, shares, total) VALUES (%s, %s, %s, %s, %s)"
+        values = (user_id, "CASH", "United States Dollar", "0", "10000.00")
+        db.execute(sql_command_portfolio, values)
         return render_template("login.html")
     return render_template("register.html")
-
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -179,4 +206,3 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
-
