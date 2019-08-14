@@ -64,7 +64,8 @@ def index():
             data.append(portfolio["total"])
         else:
                     # "https://cloud-sse.iexapis.com//stable/stock/nflx/quote?token=pk_c68c80959746417aa4e351e5eb5cdb0d"
-            api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" + portfolio["symbol"] + "/quote?token=" + api_key + "").json()
+            api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
+                                portfolio["symbol"] + "/quote?token=" + api_key + "").json()
             price = api["latestPrice"]
             data.append(price)
             total = price * portfolio["shares"]
@@ -79,12 +80,13 @@ def index():
 
 @app.route("/quote", methods=["GET", "POST"])
 @login_required
-def quote():  
+def quote():
     if request.method == "GET":
         return render_template("quote.html", data='GET')
     elif request.method == "POST":
         api_key = os.environ.get("API_KEY")
-        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" + request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
+                            request.form.get("symbol") + "/quote?token=" + api_key + "").json()
         price = api["latestPrice"]
         name = api["companyName"]
         symbol = api["symbol"]
@@ -107,7 +109,8 @@ def buy():
                 cash = x["total"]
                 cash_id = x["id"]
         api_key = os.environ.get("API_KEY")
-        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" + request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
+                            request.form.get("symbol") + "/quote?token=" + api_key + "").json()
         price = api["latestPrice"]
         name = api["companyName"]
         symbol = api["symbol"]
@@ -134,11 +137,71 @@ def buy():
         return index()
 
 
+@app.route("/sell", methods=["GET", "POST"])
+@login_required
+def sell():
+    user_id = session["user_id"]
+    portfolios = db.execute("SELECT * FROM portfolio WHERE user_id = %s", user_id)
+    if request.method == "GET":
+        symbols = []
+        for x in portfolios:
+            if x["symbol"] != "CASH":
+                symbols.append(x["symbol"])
+        return render_template("sell.html", data='GET', symbols=symbols)
+    elif request.method == "POST":
+        cash = 0.00
+        cash_id = 0
+        for x in portfolios:
+            if x["symbol"] == "CASH":
+                cash = x["total"]
+                cash_id = x["id"]
+        api_key = os.environ.get("API_KEY")
+        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
+                            request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+        price = api["latestPrice"]
+        symbol = api["symbol"]
+        shares = int(request.form.get("shares"))
+        # print(type(shares), type(price), type(cash))
+        profit = shares * price
+        cash = cash + profit
+        for x in portfolios:
+            if x["symbol"] == symbol:
+                x_id = x["id"]
+                subtracted_shares = x["shares"] - shares
+                if subtracted_shares < 0:
+                    return apology("You do not have enough shares to sell")
+                elif subtracted_shares < 1:
+                    sql_command_delete = "DELETE FROM portfolio WHERE id=%s"
+                    val_delete = (x_id)
+                    db.execute(sql_command_delete, val_delete)
+                else:
+                    sql_command_subtract_shares = "UPDATE portfolio SET shares = %s WHERE id = %s"
+                    val_shares = (subtracted_shares, x_id)
+                    db.execute(sql_command_subtract_shares, val_shares)
+                sql_command_cash = "UPDATE portfolio SET total = %s WHERE id = %s"
+                val2 = (cash, cash_id)
+                db.execute(sql_command_cash, val2)
+        sql_command_history = "INSERT INTO history (user_id, symbol, price, shares) VALUES (%s, %s, %s, %s)"
+        val = (user_id, symbol, price, shares)
+        db.execute(sql_command_history, val)
+        return index()
+
+
 @app.route("/history")
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
+    user_id = session["user_id"]
+    sales = db.execute("SELECT * FROM history WHERE user_id = %s", user_id)
+    payload = []
+    for x in sales:
+        sale = []
+        sale.append(x["symbol"])
+        sale.append(x["shares"])
+        sale.append(x["price"])
+        sale.append(x["transacted"])
+        payload.append(sale)
+    return render_template("history.html", data=payload)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -194,7 +257,7 @@ def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        password2 = request.form.get("password2")
+        password2 = request.form.get("confirmation")
 
         # Ensure username was submitted
         if not username:
@@ -228,13 +291,6 @@ def register():
         db.execute(sql_command_portfolio, values)
         return render_template("login.html")
     return render_template("register.html")
-
-
-@app.route("/sell", methods=["GET", "POST"])
-@login_required
-def sell():
-    """Sell shares of stock"""
-    return apology("TODO")
 
 
 def errorhandler(e):
