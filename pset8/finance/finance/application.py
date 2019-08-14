@@ -65,9 +65,7 @@ def index():
         else:
                     # "https://cloud-sse.iexapis.com//stable/stock/nflx/quote?token=pk_c68c80959746417aa4e351e5eb5cdb0d"
             api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" + portfolio["symbol"] + "/quote?token=" + api_key + "").json()
-            print(api)
             price = api["latestPrice"]
-            print(price)
             data.append(price)
             total = price * portfolio["shares"]
             data.append(total)
@@ -81,16 +79,52 @@ def index():
 
 @app.route("/quote", methods=["GET", "POST"])
 @login_required
-def quote():
-    """Get stock quote."""
-    return render_template("portfolio.html", data=payload, net_total=net_total)
+def quote():  
+    if request.method == "GET":
+        return render_template("quote.html", data='GET')
+    elif request.method == "POST":
+        api_key = os.environ.get("API_KEY")
+        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" + request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+        price = api["latestPrice"]
+        name = api["companyName"]
+        symbol = api["symbol"]
+        payload = "A share of " + name + "(" + symbol + ") costs $" + str(price)
+        return render_template("quote.html", data=payload)
 
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
-    """Buy shares of stock"""
-    return apology("TODO")
+    if request.method == "GET":
+        return render_template("buy.html", data='GET')
+    elif request.method == "POST":
+        user_id = session["user_id"]
+        portfolios = db.execute("SELECT * FROM portfolio WHERE user_id = %s", user_id)
+        cash = 0.00
+        cash_id = 0
+        for x in portfolios:
+            if x["symbol"] == "CASH":
+                cash = x["total"]
+                cash_id = x["id"]
+        api_key = os.environ.get("API_KEY")
+        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" + request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+        price = api["latestPrice"]
+        name = api["companyName"]
+        symbol = api["symbol"]
+        shares = int(request.form.get("shares"))
+        # print(type(shares), type(price), type(cash))
+        cost = shares * price
+        print(cash, cost)
+        if cash < cost:
+            return apology("Insufficient funds!")
+        cash = cash - cost
+        sql_command_buy = "INSERT INTO portfolio (user_id, symbol, name, shares) VALUES (%s, %s, %s, %s)"
+        val = (user_id, symbol, name, shares)
+        db.execute(sql_command_buy, val)
+        sql_command_cash = "INSERT INTO portfolio WHERE user_id = %s (total) VALUES (%s, %s)"
+        val2 = (cash_id, cash)
+        db.execute(sql_command_cash, val2)
+        return index()
 
 
 @app.route("/history")
