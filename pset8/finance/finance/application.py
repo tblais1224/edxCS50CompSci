@@ -114,16 +114,23 @@ def buy():
         shares = int(request.form.get("shares"))
         # print(type(shares), type(price), type(cash))
         cost = shares * price
-        print(cash, cost)
         if cash < cost:
             return apology("Insufficient funds!")
         cash = cash - cost
+        sql_command_cash = "UPDATE portfolio SET total = %s WHERE id = %s"
+        val2 = (cash, cash_id)
+        db.execute(sql_command_cash, val2)
+        for x in portfolios:
+            if x["symbol"] == symbol:
+                x_id = x["id"]
+                add_shares = shares + x["shares"]
+                sql_command_add_shares = "UPDATE portfolio SET shares = %s WHERE id = %s"
+                val_shares = (add_shares, x_id)
+                db.execute(sql_command_add_shares, val_shares)
+                return index()
         sql_command_buy = "INSERT INTO portfolio (user_id, symbol, name, shares) VALUES (%s, %s, %s, %s)"
         val = (user_id, symbol, name, shares)
         db.execute(sql_command_buy, val)
-        sql_command_cash = "INSERT INTO portfolio WHERE user_id = %s (total) VALUES (%s, %s)"
-        val2 = (cash_id, cash)
-        db.execute(sql_command_cash, val2)
         return index()
 
 
