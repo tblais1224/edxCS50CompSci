@@ -84,14 +84,20 @@ def quote():
     if request.method == "GET":
         return render_template("quote.html", data='GET')
     elif request.method == "POST":
+        symbol = request.form.get("symbol").lower()
+        if symbol is None:
+            return apology("must provide stock symbol", 400)
         api_key = os.environ.get("API_KEY")
         api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
-                            request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+                            symbol + "/quote?token=" + api_key + "")
+        if api.status_code == 404:
+            return apology("must provide valid stock symbol", 400)
+        api = api.json()
         price = api["latestPrice"]
         name = api["companyName"]
         symbol = api["symbol"]
         payload = "A share of " + name + "(" + symbol + ") costs $" + str(price)
-        return render_template("quote.html", data=payload)
+        return render_template("quote.html", data=payload), 200
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -108,13 +114,21 @@ def buy():
             if x["symbol"] == "CASH":
                 cash = x["total"]
                 cash_id = x["id"]
+        symbol = request.form.get("symbol").lower()
+        if symbol is None:
+            return apology("must provide stock symbol", 400)
         api_key = os.environ.get("API_KEY")
         api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
-                            request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+                            symbol + "/quote?token=" + api_key + "")
+        if api.status_code == 404:
+            return apology("must provide valid stock symbol", 400)
+        api = api.json()
         price = api["latestPrice"]
         name = api["companyName"]
         symbol = api["symbol"]
         shares = int(request.form.get("shares"))
+        if shares < 1 or isinstance(shares, int) == False or "." in str(shares):
+            return apology("must provide valid shares amount", 400)
         # print(type(shares), type(price), type(cash))
         cost = shares * price
         if cash < cost:
@@ -155,9 +169,15 @@ def sell():
             if x["symbol"] == "CASH":
                 cash = x["total"]
                 cash_id = x["id"]
+        symbol = request.form.get("symbol").lower()
+        if symbol is None:
+            return apology("must provide stock symbol", 400)
         api_key = os.environ.get("API_KEY")
         api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
-                            request.form.get("symbol") + "/quote?token=" + api_key + "").json()
+                            symbol + "/quote?token=" + api_key + "")
+        if api.status_code == 404:
+            return apology("must provide valid stock symbol", 400)
+        api = api.json()
         price = api["latestPrice"]
         symbol = api["symbol"]
         shares = int(request.form.get("shares"))
@@ -252,6 +272,19 @@ def logout():
     return redirect("/")
 
 
+@app.route("/check")
+def check():
+    """CHECK username for duplicates"""
+    username = request.args.get('username', default = "", type = str)
+    # Query database for username
+    rows = db.execute("SELECT username FROM users WHERE username = %s", username)
+    # Ensure username doesnt exist
+    if len(rows) > 0:
+        return apology("this username exists", 400)
+    # Redirect user to login form
+    return jsonify(True)
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -261,20 +294,20 @@ def register():
 
         # Ensure username was submitted
         if not username:
-            return apology("must provide username", 403)
+            return apology("must provide username", 400)
         # Ensure password was submitted
         elif not password:
-            return apology("must provide password", 403)
+            return apology("must provide password", 400)
         # Ensure password was submitted
         elif password != password2:
-            return apology("Password and confirm password must be the same", 403)
+            return apology("Password and confirm password must be the same", 400)
 
         # Query database for username
         rows = db.execute(
             "SELECT username FROM users WHERE username = %s", username)
         # Ensure username doesnt exist
         if len(rows) > 0:
-            return apology("this username exists", 403)
+            return apology("this username exists", 400)
 
         hashed_password = generate_password_hash(
             password, method='pbkdf2:sha256', salt_length=8)
