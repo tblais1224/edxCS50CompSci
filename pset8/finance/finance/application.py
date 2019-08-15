@@ -2,7 +2,7 @@ import os
 
 import requests
 from cs50 import SQL
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask import Flask, flash, jsonify, redirect, make_response, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -67,15 +67,16 @@ def index():
             api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
                                 portfolio["symbol"] + "/quote?token=" + api_key + "").json()
             price = api["latestPrice"]
-            data.append(price)
+            data.append(usd(price))
             total = price * portfolio["shares"]
             data.append(total)
         payload.append(data)
     net_total = 0.00
     for x in payload:
         net_total = net_total + x[4]
+        x[4] = usd(x[4])
 
-    return render_template("portfolio.html", data=payload, net_total=net_total)
+    return render_template("portfolio.html", data=payload, net_total=usd(net_total))
 
 
 @app.route("/quote", methods=["GET", "POST"])
@@ -84,20 +85,20 @@ def quote():
     if request.method == "GET":
         return render_template("quote.html", data='GET')
     elif request.method == "POST":
-        symbol = request.form.get("symbol").lower()
+        symbol = request.form.get("symbol")
         if symbol is None:
             return apology("must provide stock symbol", 400)
-        api_key = os.environ.get("API_KEY")
-        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
-                            symbol + "/quote?token=" + api_key + "")
-        if api.status_code == 404:
+        api = lookup(symbol)
+        if api is None:
             return apology("must provide valid stock symbol", 400)
-        api = api.json()
-        price = api["latestPrice"]
-        name = api["companyName"]
+        # api = api.json()
+        price = api["price"]
+        name = api["name"]
         symbol = api["symbol"]
-        payload = "A share of " + name + "(" + symbol + ") costs $" + str(price)
-        return render_template("quote.html", data=payload), 200
+        payload = "A share of " + name + "(" + symbol + ") costs "
+        # resp = make_response(render_template("quoted.html", data=payload, value=price), 200)
+        # return resp
+        return render_template("quoted.html", data=payload, value=price)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -117,14 +118,13 @@ def buy():
         symbol = request.form.get("symbol").lower()
         if symbol is None:
             return apology("must provide stock symbol", 400)
-        api_key = os.environ.get("API_KEY")
-        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
-                            symbol + "/quote?token=" + api_key + "")
-        if api.status_code == 404:
+        if symbol is None:
+            return apology("must provide stock symbol", 400)
+        api = lookup(symbol)
+        if api is None:
             return apology("must provide valid stock symbol", 400)
-        api = api.json()
-        price = api["latestPrice"]
-        name = api["companyName"]
+        price = api["price"]
+        name = api["name"]
         symbol = api["symbol"]
         shares = int(request.form.get("shares"))
         if shares < 1 or isinstance(shares, int) == False or "." in str(shares):
@@ -172,13 +172,10 @@ def sell():
         symbol = request.form.get("symbol").lower()
         if symbol is None:
             return apology("must provide stock symbol", 400)
-        api_key = os.environ.get("API_KEY")
-        api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
-                            symbol + "/quote?token=" + api_key + "")
-        if api.status_code == 404:
+        api = lookup(symbol)
+        if api is 404:
             return apology("must provide valid stock symbol", 400)
-        api = api.json()
-        price = api["latestPrice"]
+        price = api["price"]
         symbol = api["symbol"]
         shares = int(request.form.get("shares"))
         # print(type(shares), type(price), type(cash))
@@ -218,7 +215,7 @@ def history():
         sale = []
         sale.append(x["symbol"])
         sale.append(x["shares"])
-        sale.append(x["price"])
+        sale.append(usd(x["price"]))
         sale.append(x["transacted"])
         payload.append(sale)
     return render_template("history.html", data=payload)
@@ -280,7 +277,7 @@ def check():
     rows = db.execute("SELECT username FROM users WHERE username = %s", username)
     # Ensure username doesnt exist
     if len(rows) > 0:
-        return apology("this username exists", 400)
+        return jsonify(False)
     # Redirect user to login form
     return jsonify(True)
 
