@@ -12,6 +12,7 @@ from helpers import apology, login_required, lookup, usd
 
 # Configure application
 app = Flask(__name__)
+# export API_KEY=value
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -58,25 +59,28 @@ def index():
         data.append(portfolio["symbol"])
         data.append(portfolio["name"])
         data.append(portfolio["shares"])
-        print(portfolio["symbol"])
         if portfolio["symbol"] == "CASH":
-            data.append("x")
-            data.append(portfolio["total"])
+            data.append(1.00)
+            data.append(int(portfolio["total"]))
         else:
-                    # "https://cloud-sse.iexapis.com//stable/stock/nflx/quote?token=pk_c68c80959746417aa4e351e5eb5cdb0d"
-            api = requests.get("https://cloud-sse.iexapis.com/stable/stock/" +
-                                portfolio["symbol"] + "/quote?token=" + api_key + "").json()
-            price = api["latestPrice"]
-            data.append(usd(price))
+            api = lookup(portfolio["symbol"])
+            if api is None:
+                return apology("must provide valid stock symbol", 400)
+            price = api["price"]
+            data.append(float(price))
             total = price * portfolio["shares"]
-            data.append(total)
+            data.append(float(total))
         payload.append(data)
     net_total = 0.00
     for x in payload:
         net_total = net_total + x[4]
-        x[4] = usd(x[4])
-
-    return render_template("portfolio.html", data=payload, net_total=usd(net_total))
+    send_alert = False
+    shares_param = request.args.get('shares', default=0, type=int)
+    symbol_param = request.args.get('symbol', default="", type=str)
+    cost_param = request.args.get('cost', default=0.00, type=float)
+    price_param = request.args.get('price', default=0.00, type=float)
+    action_param = request.args.get('action', default="", type=str)
+    return render_template("portfolio.html", data=payload, net_total=float(net_total), action_param=action_param, price_param=float(price_param), shares_param=int(shares_param), symbol_param=symbol_param, cost_param=float(cost_param))
 
 
 @app.route("/quote", methods=["GET", "POST"])
@@ -115,9 +119,7 @@ def buy():
             if x["symbol"] == "CASH":
                 cash = x["total"]
                 cash_id = x["id"]
-        symbol = request.form.get("symbol").lower()
-        if symbol is None:
-            return apology("must provide stock symbol", 400)
+        symbol = request.form.get("symbol")
         if symbol is None:
             return apology("must provide stock symbol", 400)
         api = lookup(symbol)
@@ -126,10 +128,14 @@ def buy():
         price = api["price"]
         name = api["name"]
         symbol = api["symbol"]
-        shares = int(request.form.get("shares"))
-        if shares < 1 or isinstance(shares, int) == False or "." in str(shares):
+        test_shares = request.form.get("shares")
+        if "." in str(test_shares):
             return apology("must provide valid shares amount", 400)
-        # print(type(shares), type(price), type(cash))
+        elif test_shares.isnumeric() == False:
+            return apology("must provide valid shares amount", 400)
+        elif int(test_shares) < 1:
+            return apology("must provide valid shares amount", 400)
+        shares = int(test_shares)
         cost = shares * price
         if cash < cost:
             return apology("Insufficient funds!")
@@ -137,6 +143,7 @@ def buy():
         sql_command_cash = "UPDATE portfolio SET total = %s WHERE id = %s"
         val2 = (cash, cash_id)
         db.execute(sql_command_cash, val2)
+        alert_route = "/?shares=" + str(shares) + "&symbol=" + symbol + "&price=" + str(price) + "&cost=" + str(cost) + "&action=bought"
         for x in portfolios:
             if x["symbol"] == symbol:
                 x_id = x["id"]
@@ -144,11 +151,11 @@ def buy():
                 sql_command_add_shares = "UPDATE portfolio SET shares = %s WHERE id = %s"
                 val_shares = (add_shares, x_id)
                 db.execute(sql_command_add_shares, val_shares)
-                return index()
+                return redirect(alert_route)
         sql_command_buy = "INSERT INTO portfolio (user_id, symbol, name, shares) VALUES (%s, %s, %s, %s)"
         val = (user_id, symbol, name, shares)
         db.execute(sql_command_buy, val)
-        return index()
+        return redirect(alert_route)
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -169,7 +176,7 @@ def sell():
             if x["symbol"] == "CASH":
                 cash = x["total"]
                 cash_id = x["id"]
-        symbol = request.form.get("symbol").lower()
+        symbol = request.form.get("symbol")
         if symbol is None:
             return apology("must provide stock symbol", 400)
         api = lookup(symbol)
@@ -201,7 +208,8 @@ def sell():
         sql_command_history = "INSERT INTO history (user_id, symbol, price, shares) VALUES (%s, %s, %s, %s)"
         val = (user_id, symbol, price, shares)
         db.execute(sql_command_history, val)
-        return index()
+        alert_route = "/?shares=" + str(shares) + "&symbol=" + symbol + "&price=" + str(price) + "&cost=" + str(profit) + "&action=sold"
+        return redirect(alert_route)
 
 
 @app.route("/history")
@@ -272,7 +280,7 @@ def logout():
 @app.route("/check")
 def check():
     """CHECK username for duplicates"""
-    username = request.args.get('username', default = "", type = str)
+    username = request.args.get('username', default="", type=str)
     # Query database for username
     rows = db.execute("SELECT username FROM users WHERE username = %s", username)
     # Ensure username doesnt exist
