@@ -29,9 +29,9 @@ int main(void)
     int x = -1;
     int zero = 0;
     x = get_int("Please input a number from 1 to 8: ");
-    if (x < 1 || x > 8)
+    while (x < 1 || x > 8)
     {
-        return main();
+        x = get_int("Please input a number from 1 to 8: ");
     };
     print(x, zero);
 };
